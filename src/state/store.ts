@@ -1,12 +1,12 @@
 import { configureStore, Store } from '@reduxjs/toolkit';
-import testSlice from 'pages/Test/reducer';
-// import orderBookSlice from 'pages/OrderBook/slice';
+import testReducer from 'pages/Test/reducer';
+import orderBookReducer from 'pages/OrderBook/reducer';
 
 const store: Store = configureStore({
   reducer: {
-    test: testSlice,
-    // orderBook: orderBookReducer
-  },
+    test: testReducer,
+    orderBook: orderBookReducer
+  }
 });
  
 export default store;

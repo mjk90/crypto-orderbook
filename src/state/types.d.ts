@@ -15,7 +15,7 @@ export interface OrderBookData {
 }
 
 export type TestState = GenericState<TestData>;
-export type OderBookState = GenericState<OrderBookData>;
+export type OrderBookState = GenericState<OrderBookData>;
 
 export interface RootState {
   test: TestState,

@@ -7,9 +7,9 @@ Orderbook:
     - Socket.io
 
   Breakdown:
-    - Setup project
+    // - Setup project
+    // - Redux Skeleton
     - UI Skeleton
-    - Redux Skeleton
     - SCSS
       - App
       - Orderbook

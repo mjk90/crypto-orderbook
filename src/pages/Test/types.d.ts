@@ -1,2 +1,1 @@
-export interface TestPageProps {
-}
+export interface TestPageProps {}
