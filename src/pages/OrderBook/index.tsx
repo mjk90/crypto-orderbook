@@ -7,6 +7,8 @@ import { OrderBookPageProps } from "./types";
 import { setOptions } from './reducer';
 import { Button } from "components/Button";
 import { Dropdown } from "components/Dropdown";
+import { Buy } from "./components/Buy";
+import { Sell } from "./components/Sell";
 
 import "./style.scss"
 
@@ -34,8 +36,8 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
               ]} />
           </div>
           <div className="OrderBook__Body">
-            <div className="left">Left</div>
-            <div className="right">Right</div>
+            <Buy />
+            <Sell />
           </div>
           <div className="OrderBook__Footer">
            <Button onClick={() => dispatch(setOptions({ grouping, feed: feed === "PI_ETHUSD" ? "PI_XBTUSD" : "PI_ETHUSD" }))}>
