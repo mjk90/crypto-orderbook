@@ -1,0 +1,39 @@
+@import 'styles/variables.scss';
+
+.App {
+  text-align: center;
+  height: 100vh;
+  background-color: $app-bg-color;
+  color: $app-text-color;
+  display: grid;
+  grid-template-rows: 10rem auto 3rem;
+
+  h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    padding: 2rem 0;
+  }
+
+  a {
+    color: $app-link-color;
+    text-decoration: none;
+  }
+
+  .App__Header {
+    margin-bottom: 2rem;
+    ul {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      li:not(:last-child) {
+        margin-right: 1rem;
+      }
+    }
+  }
+
+  .App__Footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

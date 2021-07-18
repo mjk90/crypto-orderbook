@@ -15,14 +15,16 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
       {
         loading ? <LoadingSpinner /> :
         error ? <div>Error: {error}</div> :
-        <div>
-          <select value={grouping} onChange={(e: ChangeEvent<HTMLSelectElement>) => dispatch(setOptions({ grouping: parseFloat(e.target.value), feed }))}>
-            <option>0.5</option>
-            <option>1</option>
-            <option>1.5</option>
-          </select>
-          {/* <button onClick={() => dispatch(setName("Matt"))}>Reset</button>
-          <button onClick={() => dispatch(randomName())}>Random</button> */}
+        <div className="OrderBook">
+          <div className="OrderBook__Header">
+            <h3>Order Book</h3>
+            
+            <select value={grouping} onChange={(e: ChangeEvent<HTMLSelectElement>) => dispatch(setOptions({ grouping: parseFloat(e.target.value), feed }))}>
+              <option>0.5</option>
+              <option>1</option>
+              <option>1.5</option>
+            </select>
+          </div>
         </div>
       }
     </React.Fragment>
