@@ -1,0 +1,37 @@
+Orderbook:
+
+  Using:
+    - Typescript
+    - React
+    - Redux
+    - Socket.io
+
+  Breakdown:
+    - Setup project
+    - UI Skeleton
+    - Redux Skeleton
+    - SCSS
+      - App
+      - Orderbook
+      - Responsive
+    - Socket.io
+      - Setup websocket connections
+      - Handle initial data
+      - Handle delta
+      - Error handling
+      - Events
+    - UI
+      - Page
+      - Orderbook component
+        - BuySide component
+        - SellSide component
+        - Depth visualization
+      - Grouping dropdown
+      - Toggle Feed
+      - Kill Feed
+      - Error handling
+    - Redux
+      - Orderbook reducer
+      - Buyside reducer
+      - Sellside reducer
+      - Error handling
