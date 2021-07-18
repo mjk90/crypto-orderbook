@@ -5,6 +5,10 @@ import { RootState, OrderBookState } from "state/types"
 import { LoadingSpinner } from "components/LoadingSpinner";
 import { OrderBookPageProps } from "./types";
 import { setOptions } from './reducer';
+import { Button } from "components/Button";
+import { Dropdown } from "components/Dropdown";
+
+import "./style.scss"
 
 export const OrderBookPage: FC<OrderBookPageProps> = props => {
   const dispatch = useDispatch();
@@ -18,12 +22,26 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
         <div className="OrderBook">
           <div className="OrderBook__Header">
             <h3>Order Book</h3>
-            
-            <select value={grouping} onChange={(e: ChangeEvent<HTMLSelectElement>) => dispatch(setOptions({ grouping: parseFloat(e.target.value), feed }))}>
-              <option>0.5</option>
-              <option>1</option>
-              <option>1.5</option>
-            </select>
+            <div className="OrderBook__Spread">
+              Spread: 17.0 (0.05%)
+            </div>
+            <Dropdown value={grouping} 
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => dispatch(setOptions({ grouping: parseFloat(e.target.value), feed }))}
+              options={[
+                { value: 0.5, text: "Group 0.50" },
+                { value: 1, text: "Group 1.00" },
+                { value: 1.5, text: "Group 1.50" },
+              ]} />
+          </div>
+          <div className="OrderBook__Body">
+            <div className="left">Left</div>
+            <div className="right">Right</div>
+          </div>
+          <div className="OrderBook__Footer">
+           <Button onClick={() => dispatch(setOptions({ grouping, feed: feed === "PI_ETHUSD" ? "PI_XBTUSD" : "PI_ETHUSD" }))}>
+             Toggle Feed
+            </Button> 
+           <Button color="red" onClick={() => alert("click")}>Kill Feed</Button> 
           </div>
         </div>
       }
