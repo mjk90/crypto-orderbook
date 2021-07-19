@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import React, { FC } from 'react';
 import { DropdownOption, DropdownProps } from './types';
 import './style.scss';
 
