@@ -11,11 +11,15 @@ import "./style.scss"
 
 export const Buy: FC<BuyProps> = props => {
   const dispatch = useDispatch();
+  const { bids = [] } = props;
   const { data: { grouping, feed }, error, loading }: OrderBookState = useSelector((state: RootState) => state.orderBook);
 
   return (
     <div className="OrderBook__Buy">
-      Buy
+      <div>Price</div>
+      <div>Amount</div>
+      <div>Total</div>
+      {bids.map((bid: any, index: number) => <div key={index}>{bid}</div>)}
     </div>
   );
 };

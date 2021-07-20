@@ -1,7 +1,7 @@
-import React, { ChangeEvent, FC, useMemo, useEffect } from "react";
+import React, { ChangeEvent, FC, useMemo, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 // import { io, Socket } from 'socket.io-client'; // https://cryptofacilities.com/ws/v1
-import { w3cwebsocket as W3CWebSocket } from "websocket";
+import { w3cwebsocket as W3CWebSocket, IMessageEvent } from "websocket";
 
 import { RootState, OrderBookState } from "state/types"
 import { LoadingSpinner } from "components/LoadingSpinner";
@@ -19,6 +19,8 @@ const client = new W3CWebSocket('wss://www.cryptofacilities.com/ws/v1');
 export const OrderBookPage: FC<OrderBookPageProps> = props => {
   const dispatch = useDispatch();
   const { data: { grouping, feed }, error, loading }: OrderBookState = useSelector((state: RootState) => state.orderBook);
+  const [streaming, setStreaming] = useState(false)
+  const [orderData, setOrderData] = useState({ bids: [], asks: [] });
 
   // function bindEventListeners(socket: Socket) {
   //   if (socket) {
@@ -53,8 +55,14 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
       console.log('WebSocket Client Connected');
       client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": ["PI_XBTUSD"]}));
     };
-    client.onmessage = (message: any) => {
-      console.log(message);
+    client.onmessage = (message: IMessageEvent) => {      
+      // Initial snapshot
+      if(message.data.toString().includes("book_ui_1_snapshot")) {
+        const data = JSON.parse(message.data.toString());        
+        setOrderData({ bids: data.bids, asks: data.asks });
+      } else {
+        console.log("delta", message.data);
+      }
     };
 
     // client.onmessage = .throttle((response) => {
@@ -63,7 +71,7 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
     // }, 5000, { leading: true })
 
     return () => client.close();
-  }, [])
+  }, []);
 
   return (
     <React.Fragment>
@@ -85,8 +93,8 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
               ]} />
           </div>
           <div className="OrderBook__Body">
-            <Buy />
-            <Sell />
+            <Buy bids={orderData.bids} />
+            <Sell asks={orderData.asks} />
           </div>
           <div className="OrderBook__Footer">
             <Button onClick={() => dispatch(setOptions({ grouping, feed: feed === "PI_ETHUSD" ? "PI_XBTUSD" : "PI_ETHUSD" }))}>
