@@ -6,16 +6,27 @@ import { LoadingSpinner } from "components/LoadingSpinner";
 import { Button } from "components/Button";
 import { Dropdown } from "components/Dropdown";
 import { SellProps } from './types';
+import { Order } from "hooks";
 
 import "./style.scss"
 
 export const Sell: FC<SellProps> = props => {
   const dispatch = useDispatch();
+  const { asks = [] } = props;
   const { data: { grouping, feed }, error, loading }: OrderBookState = useSelector((state: RootState) => state.orderBook);
 
   return (
     <div className="OrderBook__Sell">
-      Sell
+      <div>Total</div>
+      <div>Size</div>
+      <div>Price</div>
+      {asks.map((ask: Order, index: number) => 
+        <React.Fragment key={index}>
+          <div>Temp</div>
+          <div>{ask.size}</div>
+          <div>{ask.price}</div>
+        </React.Fragment>
+      )}
     </div>
   );
 };

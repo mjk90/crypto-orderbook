@@ -6,6 +6,7 @@ import { LoadingSpinner } from "components/LoadingSpinner";
 import { Button } from "components/Button";
 import { Dropdown } from "components/Dropdown";
 import { BuyProps } from './types';
+import { Order } from "hooks";
 
 import "./style.scss"
 
@@ -16,10 +17,16 @@ export const Buy: FC<BuyProps> = props => {
 
   return (
     <div className="OrderBook__Buy">
-      <div>Price</div>
-      <div>Amount</div>
       <div>Total</div>
-      {bids.map((bid: any, index: number) => <div key={index}>{bid}</div>)}
+      <div>Size</div>
+      <div>Price</div>
+      {bids.map((bid: Order, index: number) => 
+        <React.Fragment key={index}>
+          <div>Temp</div>
+          <div>{bid.size}</div>
+          <div>{bid.price}</div>
+        </React.Fragment>
+      )}
     </div>
   );
 };

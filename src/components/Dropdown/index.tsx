@@ -7,7 +7,7 @@ export const Dropdown: FC<DropdownProps> = props => {
 
   return (
     <select className="Dropdown" value={value} onChange={onChange}>
-      {options.map((option: DropdownOption) => <option value={option.value}>{option.text}</option> )}
+      {options.map((option: DropdownOption, index: number) => <option key={index} value={option.value}>{option.text}</option> )}
     </select>
   )
 };
