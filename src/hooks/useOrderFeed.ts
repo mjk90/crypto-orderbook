@@ -52,27 +52,59 @@ export interface OrderFeed {
 
 const url = "wss://www.cryptofacilities.com/ws/v1";
 const updateInterval = 3000;
+const client = new W3CWebSocket(url);
 
-const useOrderFeed = (id: string, grouping: number = 0.5): OrderFeed => {
-  const client = new W3CWebSocket(url);
+const lowestMultiple = (num: number, multiple: number): number => Math.floor(num / multiple) * multiple;
+
+const groupData = (data: any[], grouping: number): Order[] => {
+  let groupedOrders: Map<number, Order> = new Map<number, Order>();
+
+  for (const [price, size] of data) {
+    let roundedPrice = lowestMultiple(price, grouping);
+    let existingOrder = groupedOrders.get(roundedPrice) || <Order>{ price: roundedPrice, size: 0 };
+    groupedOrders.set(roundedPrice, { ...existingOrder, size: existingOrder.size + size })
+  }
+
+  console.log({groupedOrders});
+  
+  return Array.from(groupedOrders.values());
+};
+
+const useOrderFeed = (id: string, grouping: number = 1): OrderFeed => {
+  const [rawData, setRawData] = useState<OrderFeed>({ bids: [], asks: [] });
   const [data, setData] = useState<OrderFeed>({ bids: [], asks: [] });
   const lastUpdated = useRef<number>(Date.now());
 
   useEffect(() => {
+    setData({ 
+      bids: groupData(rawData.bids, grouping),
+      asks: groupData(rawData.asks, grouping)
+    });
+  }, [grouping, rawData]);
+
+  useEffect(() => {
+    console.log({client});
+    
+    if(client.onopen) {
+      client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id]}));
+    }
     client.onopen = () => {
       console.log('WebSocket Client Connected', url, id);
+
+      // TODO: unsubscribe, then subscribe to the other feed
       client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id]}));
+
+      setTimeout(() => {
+        client.send(JSON.stringify({ "event": "unsubscribe", "feed": "book_ui_1", "product_ids": ["PI_XBTUSD"]}));
+        client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": ["PI_ETHUSD"]}));
+      }, 5000);
     };
     client.onmessage = (message: IMessageEvent) => {
       // Initial snapshot
       if(message.data.toString().includes("book_ui_1_snapshot")) {
         const initialData = JSON.parse(message.data.toString());
-        setData({ 
-          bids: initialData.bids.map((bid: number[]) => { return { price: bid[0], size: bid[1] } }), 
-          asks: initialData.asks.map((bid: number[]) => { return { price: bid[0], size: bid[1] } })
-        });
+        setRawData({ bids: initialData.bids, asks: initialData.asks });
       } else {
-
         // if (Date.now() >= lastUpdated.current + updateInterval) {
         //   lastUpdated.current = Date.now();
 
@@ -92,12 +124,10 @@ const useOrderFeed = (id: string, grouping: number = 0.5): OrderFeed => {
         //   setData({...prevData});
 
         // }
-
       }
-
     };
     return () => client.close();
-  }, []);
+  }, [id]);
 
   return data;
 };
