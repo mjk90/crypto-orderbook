@@ -83,21 +83,15 @@ const useOrderFeed = (id: string, grouping: number = 1): OrderFeed => {
   }, [grouping, rawData]);
 
   useEffect(() => {
-    console.log({client});
-    
-    if(client.onopen) {
+    console.log({client});    
+    if(client.readyState === WebSocket.OPEN) {
+      console.log("is open");
+      client.send(JSON.stringify({ "event": "unsubscribe", "feed": "book_ui_1", "product_ids": id === "PI_XBTUSD" ? ["PI_ETHUSD"] : ["PI_XBTUSD"]}));
       client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id]}));
     }
     client.onopen = () => {
       console.log('WebSocket Client Connected', url, id);
-
-      // TODO: unsubscribe, then subscribe to the other feed
       client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id]}));
-
-      setTimeout(() => {
-        client.send(JSON.stringify({ "event": "unsubscribe", "feed": "book_ui_1", "product_ids": ["PI_XBTUSD"]}));
-        client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": ["PI_ETHUSD"]}));
-      }, 5000);
     };
     client.onmessage = (message: IMessageEvent) => {
       // Initial snapshot
@@ -126,7 +120,7 @@ const useOrderFeed = (id: string, grouping: number = 1): OrderFeed => {
         // }
       }
     };
-    return () => client.close();
+    // return () => client.close();
   }, [id]);
 
   return data;
