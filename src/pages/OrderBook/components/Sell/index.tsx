@@ -20,7 +20,7 @@ export const Sell: FC<SellProps> = props => {
       <div>Total</div>
       <div>Size</div>
       <div>Price</div>
-      {asks.map((ask: Order, index: number) => 
+      {[...asks.values()].map((ask: Order, index: number) => 
         <React.Fragment key={index}>
           <div>Temp</div>
           <div>{ask.size}</div>

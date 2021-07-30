@@ -12,7 +12,7 @@ import "./style.scss"
 
 export const Buy: FC<BuyProps> = props => {
   const dispatch = useDispatch();
-  const { bids = [] } = props;
+  const { bids } = props;
   const { data: { grouping, feed }, error, loading }: OrderBookState = useSelector((state: RootState) => state.orderBook);
 
   return (
@@ -20,7 +20,7 @@ export const Buy: FC<BuyProps> = props => {
       <div>Total</div>
       <div>Size</div>
       <div>Price</div>
-      {bids.map((bid: Order, index: number) => 
+      {[...bids.values()].map((bid: Order, index: number) => 
         <React.Fragment key={index}>
           <div>Temp</div>
           <div>{bid.size}</div>

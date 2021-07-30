@@ -1,3 +1,4 @@
+import { Order } from 'hooks'
 export interface SellProps {
-  asks: any;
+  asks: Map<number, Order>;
 }
