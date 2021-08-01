@@ -10,23 +10,37 @@ import { Order } from "hooks";
 
 import "./style.scss"
 
+const getPercentage = (value: number, total: number) => Math.round((value / total) * 100);
+
 export const Sell: FC<SellProps> = props => {
   const dispatch = useDispatch();
   const { asks = [] } = props;
   const { data: { grouping, feed }, error, loading }: OrderBookState = useSelector((state: RootState) => state.orderBook);
-
+  
+  let total: number = 0;
+  let highestTotal: number = [...asks.values()].reduce((prev, curr) => prev + curr, 0);
+  console.log({highestTotal});
+  
+// 60,29,39
   return (
     <div className="OrderBook__Sell">
-      <div>Total</div>
-      <div>Size</div>
-      <div>Price</div>
-      {[...asks.values()].map((ask: Order, index: number) => 
-        <React.Fragment key={index}>
-          <div>Temp</div>
-          <div>{ask.size}</div>
-          <div>{ask.price}</div>
-        </React.Fragment>
-      )}
+      <div className="OrderBook__Row">
+        <div>Price</div>
+        <div>Size</div>
+        <div>Total</div>
+      </div>
+      {[...asks.entries()].map((bid: [number, number], index: number) => {
+        const [price, size] = bid;
+        total += size;
+        const depth: number = getPercentage(total, highestTotal);
+        return (
+          <div className="OrderBook__Row" style={{ background: `linear-gradient(to right, #3d1e28 ${depth}%, transparent ${depth}%)` }} key={index}>
+            <div>{price}</div>
+            <div>{size}</div>
+            <div>{total}</div>
+          </div>
+        )
+      })}
     </div>
   );
 };

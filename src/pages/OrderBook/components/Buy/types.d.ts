@@ -1,5 +1,5 @@
 import { Order } from 'hooks'
 
 export interface BuyProps {
-  bids: Map<number, Order>;
+  bids: Map<number, number>;
 }

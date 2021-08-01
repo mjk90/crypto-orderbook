@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { w3cwebsocket as W3CWebSocket, IMessageEvent } from "websocket";
-import { number } from 'prop-types';
 
 export interface Order {
   price: number;
@@ -9,119 +8,135 @@ export interface Order {
 
 export interface OrderFeed {
   id: string;
-  bids: Map<number, Order>;
-  asks: Map<number, Order>;
+  bids: Map<number, number>;
+  asks: Map<number, number>;
 }
 
-export interface RawOrderFeed {
-  id: string;
-  bids: Order[];
-  asks: Order[];
+export interface OrderUpdate {
+  bids: Array<number[]>;
+  asks: Array<number[]>;
 }
 
-const initialFeed: OrderFeed = {
-  id: "",
-  bids: new Map<number, Order>(),
-  asks: new Map<number, Order>()
+const getEmptyFeed = (): OrderFeed => {
+  return {
+    id: "",
+    bids: new Map<number, number>(),
+    asks: new Map<number, number>()
+  }
+};
+
+const getEmptyDelta = (): OrderUpdate => {
+  return {
+    bids: [], 
+    asks: []
+  }
 }
 
-const url = "wss://www.cryptofacilities.com/ws/v1";
-const updateInterval = 3000;
-const client = new W3CWebSocket(url);
+const url: string = "wss://www.cryptofacilities.com/ws/v1";
+const updateInterval: number = 1000;
+const feedSize: number = 25;
+const client: W3CWebSocket = new W3CWebSocket(url);
 
 const lowestMultiple = (num: number, multiple: number): number => Math.floor(num / multiple) * multiple;
 
-const groupData = (data: Order[], grouping: number): Map<number, Order> => {
-  let groupedOrders: Map<number, Order> = new Map<number, Order>();
+// const groupData = (data: Array<number[]>, grouping: number): Map<number, Order> => {
+//   let groupedOrders: Map<number, Order> = new Map<number, Order>();
+//   let runningTotal: number = 0;
+//   console.log("raw", data);
+  
+//   for (const [price, size] of data) {
+//     let roundedPrice: number = lowestMultiple(price, grouping);
+//     runningTotal += size;
+//     let existingOrder = groupedOrders.get(roundedPrice) || <Order>{ price: roundedPrice, size: 0, total: runningTotal };
+//     groupedOrders.set(roundedPrice, { 
+//       ...existingOrder, 
+//       size: existingOrder.size + size, 
+//       total: runningTotal 
+//     });
+//   }
+  
+//   return groupedOrders;
+// };
 
-  console.log("raw", data);
-  
-  for (const { price, size } of data) {
-    console.log({price}, {size});
-    
-    let roundedPrice = lowestMultiple(price, grouping);
-    let existingOrder = groupedOrders.get(roundedPrice) || <Order>{ price: roundedPrice, size: 0 };
-    groupedOrders.set(roundedPrice, { ...existingOrder, size: existingOrder.size + size })
+// bids in descending order
+
+const updateOrders = (
+  data: Array<number[]>,
+  existingData: Map<number, number>,
+  reverse: boolean = false
+): Map<number, number> => {
+  for (const [price, size] of data) {
+    if (size === 0) {
+      // remove from book
+      existingData.delete(price);
+    } else {
+      // update book
+      existingData.set(price, size);
+    }
   }
-  
-  return groupedOrders;
+
+  // convert to an array of entries, sort them by price, limit the array length to {feedSize} and convert back to a Map
+  return new Map<number, number>([...existingData.entries()]
+    .sort((a: [number, number], b: [number, number]) => { return reverse ? b[0] - a[0] : a[0] - b[0] })
+    .slice(0, feedSize)
+  );
 };
 
-// const updateData = (data: Map<number, Order>, newData: Order[], grouping: number): Map<number, Order> => {
-//   for (const { price, size } of newData) { 
-//     let roundedPrice = lowestMultiple(price, grouping);
-//     let existingOrder = data.get(roundedPrice);
-//     if(size === 0) {
-
-//     }
-//   }
-// }
-
 const useOrderFeed = (id: string, grouping: number = 1): OrderFeed => {
-  const [rawData, setRawData] = useState<RawOrderFeed>({ id: "", bids: [], asks: [] });
-  const [data, setData] = useState<OrderFeed>(initialFeed);
-  const lastUpdated = useRef<number>(Date.now());
-
-  useEffect(() => {
-    if(data.id) {
-      
-    } else {
-      setData({
-        id: rawData.id,
-        bids: groupData(rawData.bids, grouping),
-        asks: groupData(rawData.asks, grouping)
-      });
-    }
-  }, [grouping, rawData]);
+  const [data, setData] = useState<OrderFeed>(getEmptyFeed());
+  const delta = useRef<OrderUpdate>(getEmptyDelta());
 
   useEffect(() => {
     if(client.readyState === WebSocket.OPEN) {
-      // If connection is already open, then toggle the feed
+      // If connection is already open, then toggle the feed      
       client.send(JSON.stringify({ "event": "unsubscribe", "feed": "book_ui_1", "product_ids": [data.id]}));
       client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id]}));
     } else {
       // If connection is not open, then wait for the 'open' event to trigger and subscribe to the inital feed
-      client.onopen = () => {
-        console.log('WebSocket Client Connected', url, id);
-        client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id]}));
+      client.onopen = () => client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id]}));
+      
+      client.onmessage = (message: IMessageEvent) => {
+        const { feed = "", product_id = "", bids = [], asks = [] } = JSON.parse(message.data.toString());
+        // Initial snapshot
+        if (feed === "book_ui_1_snapshot") {      
+          setData({ 
+            id: product_id, 
+            asks: updateOrders(asks, new Map<number, number>()), 
+            bids: updateOrders(bids, new Map<number, number>(), true) 
+          });
+        } else {
+          delta.current.asks.push(...asks);
+          delta.current.bids.push(...bids);
+        }
       };
     }
 
-    client.onmessage = (message: IMessageEvent) => {
-      const msg: string = message.data.toString();
-      // Initial snapshot
-      if(msg.includes("book_ui_1_snapshot")) {
-        const initialData = JSON.parse(msg);
-        setRawData({ bids: initialData.bids, asks: initialData.asks, id: initialData.product_id });
-      } else {
-        // [price, size][]
-        // bids: [ [39824.5, 53553], [39825, 26] ]
-        const delta = JSON.parse(msg);
-        // console.log({delta});
-        
-        // if (Date.now() >= lastUpdated.current + updateInterval) {
-        //   lastUpdated.current = Date.now();
-
-        //   const delta = JSON.parse(msg);
-        //   const { bids = [], asks = [] } = delta;
-          
-        //   let prevData = data;
-        //   if(bids.length) {
-        //     prevData.bids.splice(0, bids.length);
-        //     prevData.bids.push(...bids);
-        //   }
-        //   if(asks.length) {
-        //     prevData.asks.splice(0, asks.length);
-        //     prevData.asks.push(...bids);
-        //   }
-
-        //   setData({...prevData});
-
-        // }
-      }
-    };
-    // return () => client.close();
+    // return () => { client.close() };
   }, [id]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    // When the data object has been updated and contains an 'id' (meaning we have the initial snapshot), 
+    // start an interval to periodically update it with the delta values
+    if(data.id) {
+      timer = setInterval(() => {
+        let { asks, bids } = data;
+  
+        if(delta.current.asks.length) {
+          asks = updateOrders(delta.current.asks, asks);
+        }
+        if(delta.current.bids.length) {
+          bids = updateOrders(delta.current.bids, bids, true);
+        }
+  
+        setData({ ...data, asks, bids });
+        delta.current = getEmptyDelta();
+      }, updateInterval);
+    }
+
+    return () => clearInterval(timer);
+  }, [data.id])
 
   return data;
 };
