@@ -4,6 +4,7 @@ import { w3cwebsocket as W3CWebSocket, IMessageEvent } from "websocket";
 export interface Order {
   price: number;
   size: number;
+  total?: number;
 }
 
 export interface OrderFeed {
@@ -37,32 +38,10 @@ const updateInterval: number = 1000;
 const feedSize: number = 25;
 const client: W3CWebSocket = new W3CWebSocket(url);
 
-const lowestMultiple = (num: number, multiple: number): number => Math.floor(num / multiple) * multiple;
-
-// const groupData = (data: Array<number[]>, grouping: number): Map<number, Order> => {
-//   let groupedOrders: Map<number, Order> = new Map<number, Order>();
-//   let runningTotal: number = 0;
-//   console.log("raw", data);
-  
-//   for (const [price, size] of data) {
-//     let roundedPrice: number = lowestMultiple(price, grouping);
-//     runningTotal += size;
-//     let existingOrder = groupedOrders.get(roundedPrice) || <Order>{ price: roundedPrice, size: 0, total: runningTotal };
-//     groupedOrders.set(roundedPrice, { 
-//       ...existingOrder, 
-//       size: existingOrder.size + size, 
-//       total: runningTotal 
-//     });
-//   }
-  
-//   return groupedOrders;
-// };
-
-// bids in descending order
-
 const updateOrders = (
   data: Array<number[]>,
   existingData: Map<number, number>,
+  grouping: number,
   reverse: boolean = false
 ): Map<number, number> => {
   for (const [price, size] of data) {
@@ -101,8 +80,8 @@ const useOrderFeed = (id: string, grouping: number = 1): OrderFeed => {
         if (feed === "book_ui_1_snapshot") {      
           setData({ 
             id: product_id, 
-            asks: updateOrders(asks, new Map<number, number>()), 
-            bids: updateOrders(bids, new Map<number, number>(), true) 
+            asks: updateOrders(asks, new Map<number, number>(), grouping), 
+            bids: updateOrders(bids, new Map<number, number>(), grouping, true) 
           });
         } else {
           delta.current.asks.push(...asks);
@@ -124,10 +103,10 @@ const useOrderFeed = (id: string, grouping: number = 1): OrderFeed => {
         let { asks, bids } = data;
   
         if(delta.current.asks.length) {
-          asks = updateOrders(delta.current.asks, asks);
+          asks = updateOrders(delta.current.asks, asks, grouping);
         }
         if(delta.current.bids.length) {
-          bids = updateOrders(delta.current.bids, bids, true);
+          bids = updateOrders(delta.current.bids, bids, grouping, true);
         }
   
         setData({ ...data, asks, bids });

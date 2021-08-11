@@ -4,7 +4,9 @@
     "lib": [
       "dom",
       "dom.iterable",
-      "esnext"
+      "esnext",
+      "webworker",
+      "scripthost"
     ],
     "allowJs": true,
     "skipLibCheck": true,
@@ -18,9 +20,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "baseUrl": "src",
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "typeRoots" : [
+      "./node_modules/@types", 
+      "./src/types"
+    ]
   },
   "include": [
     "src"

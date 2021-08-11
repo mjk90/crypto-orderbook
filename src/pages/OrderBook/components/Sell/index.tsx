@@ -9,19 +9,20 @@ import { SellProps } from './types';
 import { Order } from "hooks";
 
 import "./style.scss"
+import { groupData, highestTotal } from "helpers";
 
 const getPercentage = (value: number, total: number) => Math.round((value / total) * 100);
 
 export const Sell: FC<SellProps> = props => {
   const dispatch = useDispatch();
-  const { asks = [] } = props;
   const { data: { grouping, feed }, error, loading }: OrderBookState = useSelector((state: RootState) => state.orderBook);
+  const { asks = [] } = props;
+  const bidsList: Array<[number, number]> = [...asks.entries()];
   
   let total: number = 0;
-  let highestTotal: number = [...asks.values()].reduce((prev, curr) => prev + curr, 0);
-  console.log({highestTotal});
+  const highest: number = highestTotal(bidsList);
+  const groupedBids: Map<number, Order> = groupData(bidsList, grouping);
   
-// 60,29,39
   return (
     <div className="OrderBook__Sell">
       <div className="OrderBook__Row">
@@ -29,14 +30,14 @@ export const Sell: FC<SellProps> = props => {
         <div>Size</div>
         <div>Total</div>
       </div>
-      {[...asks.entries()].map((bid: [number, number], index: number) => {
-        const [price, size] = bid;
-        total += size;
-        const depth: number = getPercentage(total, highestTotal);
+      {[...groupedBids.entries()].map((ask: [number, Order], index: number) => {
+        const [price, order] = ask;
+        total += order.size;
+        const depth: number = getPercentage(total, highest);
         return (
           <div className="OrderBook__Row" style={{ background: `linear-gradient(to right, #3d1e28 ${depth}%, transparent ${depth}%)` }} key={index}>
             <div>{price}</div>
-            <div>{size}</div>
+            <div>{order.size}</div>
             <div>{total}</div>
           </div>
         )
