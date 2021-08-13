@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useEffect, useState } from "react";
+import React, { ChangeEvent, FC, useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import { RootState, OrderBookState } from "state/types"
@@ -35,14 +35,23 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
   // const orderData: OrderFeed = useOrderFeed(feed, grouping);
   // console.log({orderData});
   const [orderData, setOrderData] = useState<OrderFeed>({ id: "", asks: new Map<number, number>(), bids: new Map<number, number>()});
+  const worker = useRef<WebsocketWorker>();
 
   useEffect(() => {
-    const worker = new WebsocketWorker();
-    worker.postMessage({ id: feed })
-    worker.onmessage = (message: MessageEvent<OrderFeed>) => {
+    worker.current = new WebsocketWorker();
+    console.log(worker.current);
+    
+    worker.current.port.start();
+    worker.current.port.postMessage({ action: "update_feed", id: feed });
+    worker.current.port.onmessage = (message: MessageEvent<OrderFeed>) => {
       if(message.data.id) {
         setOrderData(message.data);
       }
+    };
+
+    return () => {
+      worker.current?.port.postMessage({ action: "exit_worker" });
+      worker.current?.port.close()
     };
   }, [feed]);
 

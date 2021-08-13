@@ -1,8 +1,8 @@
 import { w3cwebsocket as W3CWebSocket, IMessageEvent } from "websocket";
 
 interface WebsocketMessage {
-  id: string;
-  grouping: number;
+  action: "update_feed" | "exit_worker";
+  id?: string;
 }
 
 export interface Order {
@@ -22,6 +22,10 @@ export interface OrderUpdate {
   asks: Array<number[]>;
 }
 
+interface SharedWorkerGlobalScope {
+  onconnect: (event: MessageEvent) => void;
+}
+
 const getEmptyFeed = (): OrderFeed => {
   return {
     id: "",
@@ -37,12 +41,7 @@ const getEmptyDelta = (): OrderUpdate => {
   }
 }
 
-const updateOrders = (
-  data: Array<number[]>,
-  existingData: Map<number, number>,
-  grouping: number,
-  reverse: boolean = false
-): Map<number, number> => {
+const updateOrders = (data: Array<number[]>, existingData: Map<number, number>, reverse: boolean = false): Map<number, number> => {
   for (const [price, size] of data) {
     if (size === 0) {
       // remove from book
@@ -69,47 +68,64 @@ let data: OrderFeed = getEmptyFeed();
 let delta: OrderUpdate = getEmptyDelta();
 
 /* eslint-disable-next-line no-restricted-globals */
-const ctx: Worker = self as any;
+const ctx: SharedWorkerGlobalScope = self as any;
 
-// Post data to parent thread
-// ctx.postMessage({ foo: "foo" });
+const connectedPorts: Array<MessagePort> = [];
 
-// Respond to message from parent thread
-ctx.addEventListener("message", (event: MessageEvent<WebsocketMessage>) => {
-  const { id, grouping = 1 } = event.data;
+// TODO: shared worker: https://stackoverflow.com/questions/61865890/run-websocket-in-web-worker-or-service-worker-javascript
+ctx.onconnect = (event: MessageEvent) => {
+  console.log("onconnect");
+  
+  const port = event.ports[0];
+  connectedPorts.push(port);
 
-  client.onopen = () => client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id]}));
+  // Respond to message from parent thread
+  port.onmessage = (event: MessageEvent<WebsocketMessage>) => {
+    const { action, id } = event.data;
+    console.log("message", id, client.readyState, action);
 
-  client.onmessage = (message: IMessageEvent) => {
-    const { feed = "", product_id = "", bids = [], asks = [] } = JSON.parse(message.data.toString());
-    // Initial snapshot
-    if (feed === "book_ui_1_snapshot") {
-      data = {
-        id: product_id,
-        asks: updateOrders(asks, new Map<number, number>(), grouping), 
-        bids: updateOrders(bids, new Map<number, number>(), grouping, true) 
-      };
-    } else {
-      delta.asks.push(...asks);
-      delta.bids.push(...bids);
+    if(action === "exit_worker") {
+      const index = connectedPorts.indexOf(port);
+      connectedPorts.splice(index, 1);
+    } else if (action === "update_feed") {
+      if(client.readyState === WebSocket.OPEN) {
+        // If connection is already open, then toggle the feed
+        client.send(JSON.stringify({ "event": "unsubscribe", "feed": "book_ui_1", "product_ids": [data.id]}));
+        client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id]}));
+      } else {
+        client.onopen = () => client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id]}));
+  
+        client.onmessage = (message: IMessageEvent) => {
+          const { feed = "", product_id = "", bids = [], asks = [] } = JSON.parse(message.data.toString());
+          console.log("msg");
+          
+          // Initial snapshot
+          if (feed === "book_ui_1_snapshot") {
+            data = {
+              id: product_id,
+              asks: updateOrders(asks, new Map<number, number>()), 
+              bids: updateOrders(bids, new Map<number, number>(), true) 
+            };
+          } else {
+            delta.asks.push(...asks);
+            delta.bids.push(...bids);
+          }
+        };
+      }
     }
   };
-  
-  let timer: NodeJS.Timeout = setInterval(() => {
-    let { asks, bids } = data;
+};
 
-    if(delta.asks.length) {
-      asks = updateOrders(delta.asks, asks, grouping);
-    }
-    if(delta.bids.length) {
-      bids = updateOrders(delta.bids, bids, grouping, true);
-    }
+let timer: NodeJS.Timeout = setInterval(() => {
+  let { asks, bids } = data;
 
-    data = { ...data, asks, bids };
-    delta = getEmptyDelta();
-    ctx.postMessage(data);
-  }, updateInterval);
+  if(delta.asks.length) asks = updateOrders(delta.asks, asks);
+  if(delta.bids.length) bids = updateOrders(delta.bids, bids, true);
 
-});
+  data = { ...data, asks, bids };
+  delta = getEmptyDelta();
+
+  connectedPorts.forEach((port: MessagePort) => port.postMessage(data));
+}, updateInterval);
 
 export default ctx;
