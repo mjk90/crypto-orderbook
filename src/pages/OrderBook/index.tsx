@@ -11,10 +11,9 @@ import { Dropdown } from "components/Dropdown";
 import { DropdownOption } from "components/Dropdown/types";
 import { Buy } from "./components/Buy";
 import { Sell } from "./components/Sell";
-import WebsocketWorker from "worker-loader!workers/websocket.worker"; // eslint-disable-line import/no-webpack-loader-syntax
+import WebsocketWorker from "sharedworker-loader?name=worker.js!workers/websocket.worker"; // eslint-disable-line import/no-webpack-loader-syntax
 
-import "./style.scss"
-
+import "./style.scss";
 
 const groupingOptions: Map<string, DropdownOption[]> = new Map<string, DropdownOption[]> ([
   ["PI_XBTUSD", [
@@ -32,10 +31,14 @@ const groupingOptions: Map<string, DropdownOption[]> = new Map<string, DropdownO
 export const OrderBookPage: FC<OrderBookPageProps> = props => {
   const dispatch = useDispatch();
   const { data: { grouping, feed }, error, loading }: OrderBookState = useSelector((state: RootState) => state.orderBook);
-  // const orderData: OrderFeed = useOrderFeed(feed, grouping);
-  // console.log({orderData});
   const [orderData, setOrderData] = useState<OrderFeed>({ id: "", asks: new Map<number, number>(), bids: new Map<number, number>()});
   const worker = useRef<WebsocketWorker>();
+
+  const handleUnload = (e: Event) => {
+    console.log("handleUnload");      
+    worker.current?.port.postMessage({ action: "exit_worker" });
+    worker.current?.port.close();
+  };
 
   useEffect(() => {
     worker.current = new WebsocketWorker();
@@ -43,16 +46,14 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
     
     worker.current.port.start();
     worker.current.port.postMessage({ action: "update_feed", id: feed });
-    worker.current.port.onmessage = (message: MessageEvent<OrderFeed>) => {
+    worker.current.port.onmessage = (message: MessageEvent<OrderFeed>) => {      
       if(message.data.id) {
         setOrderData(message.data);
       }
     };
 
-    return () => {
-      worker.current?.port.postMessage({ action: "exit_worker" });
-      worker.current?.port.close()
-    };
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
   }, [feed]);
 
   return (

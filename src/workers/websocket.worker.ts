@@ -22,10 +22,6 @@ export interface OrderUpdate {
   asks: Array<number[]>;
 }
 
-interface SharedWorkerGlobalScope {
-  onconnect: (event: MessageEvent) => void;
-}
-
 const getEmptyFeed = (): OrderFeed => {
   return {
     id: "",
@@ -72,6 +68,8 @@ const ctx: SharedWorkerGlobalScope = self as any;
 
 const connectedPorts: Array<MessagePort> = [];
 
+console.log({ctx})
+
 // TODO: shared worker: https://stackoverflow.com/questions/61865890/run-websocket-in-web-worker-or-service-worker-javascript
 ctx.onconnect = (event: MessageEvent) => {
   console.log("onconnect");
@@ -84,7 +82,7 @@ ctx.onconnect = (event: MessageEvent) => {
     const { action, id } = event.data;
     console.log("message", id, client.readyState, action);
 
-    if(action === "exit_worker") {
+    if(action === "exit_worker") {      
       const index = connectedPorts.indexOf(port);
       connectedPorts.splice(index, 1);
     } else if (action === "update_feed") {
@@ -123,7 +121,7 @@ let timer: NodeJS.Timeout = setInterval(() => {
   if(delta.bids.length) bids = updateOrders(delta.bids, bids, true);
 
   data = { ...data, asks, bids };
-  delta = getEmptyDelta();
+  delta = getEmptyDelta();  
 
   connectedPorts.forEach((port: MessagePort) => port.postMessage(data));
 }, updateInterval);

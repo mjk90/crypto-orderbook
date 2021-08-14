@@ -17,9 +17,13 @@ const main = {
   },
   module: {
     rules: [
+      // {
+      //   test: /\.worker\.ts$/,
+      //   loader: "worker-loader",
+      // },
       {
-        test: /\.worker\.ts$/,
-        loader: "worker-loader",
+        test: /\.worker\.js$/,
+        loader: "sharedworker-loader"
       },
       {
         test: /\.tsx?$/,
@@ -37,12 +41,7 @@ const main = {
         ],
       },
     ],
-  },
-  devServer: {
-    publicPath: "/",
-    contentBase: "./src",
-    hot: true
-  },
+  }
 };
 
 module.exports = main;
