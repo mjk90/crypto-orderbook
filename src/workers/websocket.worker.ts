@@ -1,20 +1,5 @@
+import { OrderFeed, OrderUpdate, OrderFeedMessage } from "types/order";
 import { IMessageEvent } from "websocket";
-
-interface OrderFeedMessage {
-  action: "CONNECT_FEED" | "KILL_FEED";
-  id?: string;
-}
-
-export interface OrderFeed {
-  id: string;
-  bids: Map<number, number>;
-  asks: Map<number, number>;
-}
-
-export interface OrderUpdate {
-  bids: Array<number[]>;
-  asks: Array<number[]>;
-}
 
 const getEmptyFeed = (): OrderFeed => {
   const emptyMap: Map<number, number> = new Map<number, number>();
@@ -58,22 +43,35 @@ class OrderFeedSocket {
   private setupInitialConnection(id: string) {
     this.client.onopen = () => this.client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id]}));
     this.client.onmessage = (message: IMessageEvent) => {
-      const { feed = "", product_id = "", bids = [], asks = [] } = JSON.parse(message.data.toString());
-      console.log("msg");
-      
-      // Initial snapshot
-      if (feed === "book_ui_1_snapshot") {
-        console.log("snapshot", asks);
-        this.data = {
-          id: product_id,
-          asks: this.updateOrders(asks, new Map<number, number>()), 
-          bids: this.updateOrders(bids, new Map<number, number>(), true) 
-        };
-      } else {        
-        if(this.data.id !== "") {
-          this.delta.asks.push(...asks);
-          this.delta.bids.push(...bids);
+      try {
+        const { event = "", feed = "", product_id = "", bids = [], asks = [] } = JSON.parse(message.data.toString());
+        console.log("msg");
+        
+        switch (feed) {
+          case "book_ui_1":
+            // Delta (updates to snapshot)
+            if(this.data.id !== "") {
+              this.delta.asks.push(...asks);
+              this.delta.bids.push(...bids);
+            }
+            break;
+          case "book_ui_1_snapshot":
+            // Initial snapshot
+            this.data = {
+              id: product_id,
+              asks: this.updateOrders(asks, new Map<number, number>()), 
+              bids: this.updateOrders(bids, new Map<number, number>(), true) 
+            };
+            break;
+          default:
+            console.log(event ? 
+              `Recieved event: ${message.data}` : 
+              `Message not recognized: ${message}`
+            );            
+            break;
         }
+      } catch(err) {
+        console.log("Error processing websocket message:", err);  
       }
     };
   }
@@ -106,10 +104,11 @@ class OrderFeedSocket {
     );
   };
 
-  private emitData() {    
+  private emitData() {
+    // On each 'emitData', update 'data' using the accumulated 'deltas', then empty the 'delta' object, and finally, post to the UI
     this.data = {
       ...this.data,
-      asks: this.delta.asks.length ? this.updateOrders(this.delta.asks, this.data.asks) : this.data.asks, 
+      asks: this.delta.asks.length ? this.updateOrders(this.delta.asks, this.data.asks) : this.data.asks,
       bids: this.delta.bids.length ? this.updateOrders(this.delta.bids, this.data.bids, true) : this.data.bids
     };
     this.delta = getEmptyDelta();
@@ -121,8 +120,6 @@ const socket: OrderFeedSocket = new OrderFeedSocket();
 
 onmessage = (event: MessageEvent<OrderFeedMessage>) => {
   const { action, id = "PI_XBTUSD" } = event.data;
-  console.log("message", id);
-
   if(action === "CONNECT_FEED") {
     socket.connectToFeed(id);
   } else if (action === "KILL_FEED") {

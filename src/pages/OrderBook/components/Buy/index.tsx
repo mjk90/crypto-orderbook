@@ -1,17 +1,16 @@
 import React, { FC } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 import { RootState, OrderBookState } from "state/types"
 import { LoadingSpinner } from "components/LoadingSpinner";
 import { BuyProps } from './types';
-import { Order } from "hooks";
 import { percentage, groupData, highestTotal } from "helpers";
+import { Order } from "types/order";
 
 import "./style.scss"
 
 export const Buy: FC<BuyProps> = props => {
-  const dispatch = useDispatch();
-  const { data: { grouping, feed }, error, loading }: OrderBookState = useSelector((state: RootState) => state.orderBook);
+  const { data: { grouping } }: OrderBookState = useSelector((state: RootState) => state.orderBook);
   const { bidsList = [] } = props;
   
   const groupedBids: Array<Order> = [...groupData(bidsList, grouping).values()];

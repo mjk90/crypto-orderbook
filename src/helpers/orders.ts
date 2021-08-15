@@ -1,4 +1,4 @@
-import { Order } from "../hooks";
+import { Order } from "types/order";
 
 const percentage = (value: number, total: number): number => Number(((value / total) * 100).toFixed(2));
 
