@@ -22,7 +22,6 @@
     "react-scripts": "4.0.3",
     "redux": "^4.1.0",
     "sass": "^1.35.2",
-    "sharedworker-loader": "^2.1.1",
     "typescript": "^4.1.2",
     "web-vitals": "^1.0.1",
     "websocket": "^1.0.34"

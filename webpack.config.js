@@ -17,13 +17,9 @@ const main = {
   },
   module: {
     rules: [
-      // {
-      //   test: /\.worker\.ts$/,
-      //   loader: "worker-loader",
-      // },
       {
-        test: /\.worker\.js$/,
-        loader: "sharedworker-loader"
+        test: /\.worker\.ts$/,
+        loader: "worker-loader",
       },
       {
         test: /\.tsx?$/,

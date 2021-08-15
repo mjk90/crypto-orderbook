@@ -1,4 +1,10 @@
 import React, { FC } from 'react';
 import './style.scss';
 
-export const LoadingSpinner: FC = props => <div className="lds-ring"><div></div><div></div><div></div><div></div></div>;
+interface LoadingSpinnerProps {
+  className?: string;
+}
+
+export const LoadingSpinner: FC<LoadingSpinnerProps> = (props: LoadingSpinnerProps) => 
+  <div className={`lds-ring ${props.className}`}><div></div><div></div><div></div><div></div></div>
+;

@@ -1,5 +1,5 @@
 import { Order } from 'hooks'
 
 export interface BuyProps {
-  bids: Map<number, number>;
+  bidsList: Array<[number, number]>;
 }

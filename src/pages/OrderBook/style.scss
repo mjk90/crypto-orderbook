@@ -16,6 +16,11 @@
     
     > div {
       width: 50%;
+      min-height: 50vh;
+
+      .lds-ring {
+        margin: 5rem;
+      }
     }
     .OrderBook__Row {
       display: flex;

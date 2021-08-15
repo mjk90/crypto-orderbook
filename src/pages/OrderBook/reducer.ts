@@ -7,7 +7,7 @@ const initState: OrderBookState = {
     grouping: 0.5,
     feed: "PI_XBTUSD"
   },
-  loading: false,
+  loading: true,
   error: null
 };
 
