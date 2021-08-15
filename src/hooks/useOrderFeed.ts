@@ -3,7 +3,7 @@ import { OrderBookData } from 'state/types';
 import { OrderFeed } from 'types/order';
 import WebsocketWorker from "worker-loader!workers/websocket.worker"; // eslint-disable-line import/no-webpack-loader-syntax
 
-const useOrderFeed = (feed: OrderBookData["feed"], onFeedChange: (feed: OrderBookData["feed"]) => void): OrderFeed => {
+const useOrderFeed = (feed: OrderBookData["feed"], onFeedChange: (feed: OrderBookData["feed"]) => void, forceError: string = ""): OrderFeed => {
   const [data, setData] = useState<OrderFeed>({ id: "", asks: new Map<number, number>(), bids: new Map<number, number>() });
   const worker = useRef<WebsocketWorker>();
 
@@ -23,6 +23,16 @@ const useOrderFeed = (feed: OrderBookData["feed"], onFeedChange: (feed: OrderBoo
     onFeedChange(feed);
     worker.current?.postMessage({ action: "CONNECT_FEED", id: feed });
   }, [feed]);
+
+  useEffect(() => {
+    console.log({forceError});
+    
+    if(forceError) {
+      worker.current?.postMessage({ action: "FORCE_ERROR", forceError });
+    } else {
+
+    }
+  }, [forceError])
 
   return data;
 };

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC } from "react";
+import React, { ChangeEvent, FC, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import { RootState, OrderBookState, OrderBookData } from "state/types"
@@ -31,10 +31,11 @@ const groupingOptions: Map<string, DropdownOption[]> = new Map<string, DropdownO
 
 export const OrderBookPage: FC<OrderBookPageProps> = props => {
   const dispatch = useDispatch();
+  const [forceError, setForceError] = useState<string>("");
   const setDefaultGrouping = (feed: OrderBookData["feed"]) => dispatch(setOptions({ grouping: Number((groupingOptions.get(feed) || [])[0]?.value), feed }));
 
   const { data: { grouping, feed }, error, loading }: OrderBookState = useSelector((state: RootState) => state.orderBook);
-  const orderData: OrderFeed = useOrderFeed(feed, setDefaultGrouping);
+  const orderData: OrderFeed = useOrderFeed(feed, setDefaultGrouping, forceError);
   
   const asksList: Array<[number, number]> = [...orderData.asks.entries()];
   const bidsList: Array<[number, number]> = [...orderData.bids.entries()];
@@ -49,7 +50,7 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
                 <h3>Order Book ({feed})</h3>
                 <div className="OrderBook__Spread">
                   Spread: {getSpread(asksList, bidsList)}
-              </div>
+                </div>
                 <Dropdown value={grouping}
                   onChange={(e: ChangeEvent<HTMLSelectElement>) => dispatch(setOptions({ grouping: parseFloat(e.target.value), feed }))}
                   options={groupingOptions.get(feed) || []} />
@@ -62,7 +63,7 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
                 <Button onClick={() => dispatch(setOptions({ grouping, feed: feed === "PI_ETHUSD" ? "PI_XBTUSD" : "PI_ETHUSD" }))}>
                   Toggle Feed
                 </Button>
-                <Button color="red" onClick={() => console.log("hit")}>Kill Feed</Button>
+                <Button color="red" onClick={() => setForceError(forceError ? "" : "Triggered error from Kill Feed button")}>Kill Feed</Button>
               </div>
             </React.Fragment>
       }

@@ -1,6 +1,7 @@
 export interface OrderFeedMessage {
-  action: "CONNECT_FEED" | "KILL_FEED";
+  action: "CONNECT_FEED" | "KILL_FEED" | "FORCE_ERROR";
   id?: string;
+  forceError?: string;
 }
 
 export interface OrderFeed {

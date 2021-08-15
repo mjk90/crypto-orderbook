@@ -24,6 +24,7 @@ class OrderFeedSocket {
   private client: WebSocket;
   private data: OrderFeed;
   private delta: OrderUpdate;
+  private error: string = "";
 
   constructor() {
     this.data = getEmptyFeed();
@@ -45,7 +46,10 @@ class OrderFeedSocket {
     this.client.onmessage = (message: IMessageEvent) => {
       try {
         const { event = "", feed = "", product_id = "", bids = [], asks = [] } = JSON.parse(message.data.toString());
-        console.log("msg");
+        
+        if(this.error) {
+          throw new Error(this.error);
+        }
         
         switch (feed) {
           case "book_ui_1":
@@ -88,6 +92,10 @@ class OrderFeedSocket {
     this.client.close();
   }
 
+  throwError(message: string) {
+    this.error = message;
+  }
+
   private updateOrders(data: Array<number[]>, existingData: Map<number, number>, reverse: boolean = false): Map<number, number> {
     for (const [price, size] of data) {
       if (size === 0) {
@@ -119,13 +127,21 @@ class OrderFeedSocket {
 const socket: OrderFeedSocket = new OrderFeedSocket();
 
 onmessage = (event: MessageEvent<OrderFeedMessage>) => {
-  const { action, id = "PI_XBTUSD" } = event.data;
-  if(action === "CONNECT_FEED") {
-    socket.connectToFeed(id);
-  } else if (action === "KILL_FEED") {
-    socket.disconnectFromFeed();
-  } else {
-    console.log("Action not recognized:", action);    
+  const { action, id = "PI_XBTUSD", forceError = "" } = event.data;
+
+  switch (action) {
+    case "CONNECT_FEED":
+      socket.connectToFeed(id);
+      break;
+    case "KILL_FEED":
+      socket.disconnectFromFeed();
+      break;
+    case "FORCE_ERROR":
+      socket.throwError(forceError);
+      break;  
+    default:
+      console.log("Action not recognized:", action);
+      break;
   }
 };
 
