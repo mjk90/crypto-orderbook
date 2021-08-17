@@ -24,15 +24,7 @@ const useOrderFeed = (feed: OrderBookData["feed"], onFeedChange: (feed: OrderBoo
     worker.current?.postMessage({ action: "CONNECT_FEED", id: feed });
   }, [feed]);
 
-  useEffect(() => {
-    console.log({forceError});
-    
-    if(forceError) {
-      worker.current?.postMessage({ action: "FORCE_ERROR", forceError });
-    } else {
-
-    }
-  }, [forceError])
+  useEffect(() => worker.current?.postMessage({ action: "FORCE_ERROR", forceError }), [forceError])
 
   return data;
 };
