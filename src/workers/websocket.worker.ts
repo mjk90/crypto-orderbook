@@ -6,7 +6,8 @@ const getEmptyFeed = (): OrderFeed => {
   return {
     id: "",
     bids: emptyMap,
-    asks: emptyMap
+    asks: emptyMap,
+    connected: false
   }
 };
 
@@ -74,7 +75,8 @@ class OrderFeedSocket {
           this.data = {
             id: product_id,
             asks: this.updateOrders(asks, new Map<number, number>()), 
-            bids: this.updateOrders(bids, new Map<number, number>(), true) 
+            bids: this.updateOrders(bids, new Map<number, number>(), true),
+            connected: true
           };
           break;
         default:
@@ -127,7 +129,8 @@ class OrderFeedSocket {
     this.data = {
       ...this.data,
       asks: this.delta.asks.length ? this.updateOrders(this.delta.asks, this.data.asks) : this.data.asks,
-      bids: this.delta.bids.length ? this.updateOrders(this.delta.bids, this.data.bids, true) : this.data.bids
+      bids: this.delta.bids.length ? this.updateOrders(this.delta.bids, this.data.bids, true) : this.data.bids,
+      connected: this.client && this.client.readyState === WebSocket.OPEN
     };
     this.delta = getEmptyDelta();
     postMessage(this.data);

@@ -14,4 +14,9 @@
   &.Button__red {
     background: #b91d1d;
   }
+  &:disabled {
+    opacity: 0.7;
+    background: gray;
+    border-color: rgba(118, 118, 118, 0.3);
+  }
 }

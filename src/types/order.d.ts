@@ -8,6 +8,7 @@ export interface OrderFeed {
   id: string;
   bids: Map<number, number>;
   asks: Map<number, number>;
+  connected: boolean;
 }
 
 export interface OrderUpdate {

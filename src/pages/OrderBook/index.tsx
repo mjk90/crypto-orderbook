@@ -41,17 +41,17 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
   const bidsList: Array<[number, number]> = [...orderData.bids.entries()];
 
   return (
-    <div className="OrderBook">
+    <div className={`OrderBook ${orderData.connected ? "" : "connecting"}`}>
       {
         loading ? <LoadingSpinner /> :
           error ? <div>Error: {error}</div> :
             <React.Fragment>
               <div className="OrderBook__Header">
-                <h3>Order Book ({feed})</h3>
+                <h3>Order Book ({feed}) {orderData.connected ? "" : <span className="ellipsis">Reconnecting</span>}</h3>
                 <div className="OrderBook__Spread">
                   Spread: {getSpread(asksList, bidsList)}
                 </div>
-                <Dropdown value={grouping}
+                <Dropdown value={grouping} disabled={!orderData.connected}
                   onChange={(e: ChangeEvent<HTMLSelectElement>) => dispatch(setOptions({ grouping: parseFloat(e.target.value), feed }))}
                   options={groupingOptions.get(feed) || []} />
               </div>
@@ -60,7 +60,7 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
                 <Sell asksList={asksList} />
               </div>
               <div className="OrderBook__Footer">
-                <Button onClick={() => dispatch(setOptions({ grouping, feed: feed === "PI_ETHUSD" ? "PI_XBTUSD" : "PI_ETHUSD" }))}>
+                <Button disabled={!orderData.connected} onClick={() => dispatch(setOptions({ grouping, feed: feed === "PI_ETHUSD" ? "PI_XBTUSD" : "PI_ETHUSD" }))}>
                   Toggle Feed
                 </Button>
                 <Button color="red" onClick={() => setForceError(forceError ? "" : "Triggered error from Kill Feed button")}>Kill Feed</Button>

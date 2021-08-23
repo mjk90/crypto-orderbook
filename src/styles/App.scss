@@ -40,4 +40,31 @@
     align-items: center;
     justify-content: center;
   }
+
+  .ellipsis {
+    width: 115px;
+    display: inline-block;
+    text-align: left;
+    &:after {
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: bottom;
+      -webkit-animation: ellipsis steps(4,end) 1200ms infinite;      
+      animation: ellipsis steps(4,end) 1200ms infinite;
+      content: "\2026";
+      width: 0px;
+    }
+  }
+  
+  @keyframes ellipsis {
+    to {
+      width: 20px;    
+    }
+  }
+  
+  @-webkit-keyframes ellipsis {
+    to {
+      width: 20px;    
+    }
+  }
 }

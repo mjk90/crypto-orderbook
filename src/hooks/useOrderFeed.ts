@@ -4,7 +4,7 @@ import { OrderFeed } from 'types/order';
 import WebsocketWorker from "worker-loader!workers/websocket.worker"; // eslint-disable-line import/no-webpack-loader-syntax
 
 const useOrderFeed = (feed: OrderBookData["feed"], onFeedChange: (feed: OrderBookData["feed"]) => void, forceError: string = ""): OrderFeed => {
-  const [data, setData] = useState<OrderFeed>({ id: "", asks: new Map<number, number>(), bids: new Map<number, number>() });
+  const [data, setData] = useState<OrderFeed>({ id: "", asks: new Map<number, number>(), bids: new Map<number, number>(), connected: false });
   const worker = useRef<WebsocketWorker>();
 
   const handleUnload = (e: Event) => {
