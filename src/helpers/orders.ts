@@ -4,7 +4,7 @@ const percentage = (value: number, total: number): number => Number(((value / to
 
 const lowestMultiple = (num: number, multiple: number): number => Number((Math.floor(num / multiple) * multiple).toFixed(2));
 
-const highestTotal = (bids: Array<Order>): number => bids.length ? (bids[bids.length - 1].total || 0) : 0;
+const highestTotal = (orders: Array<Order>): number => orders.length ? (orders[orders.length - 1].total || 0) : 0;
 
 const groupData = (data: Array<number[]>, grouping: number): Map<number, Order> => {
   let groupedOrders: Map<number, Order> = new Map<number, Order>();
@@ -31,8 +31,8 @@ const getSpread = (asksList: Array<[number, number]>, bidsList: Array<[number, n
   }
 
   // Difference between lowest ask & highest bid
-  const lowestAsk: number = asksList[0][0];
-  const highestBid: number = bidsList[0][0];
+  const lowestAsk: number = asksList[0][0] || 0;
+  const highestBid: number = bidsList[0][0] || 0;
   const diff: number = lowestAsk - highestBid;
   const percent: number = percentage(diff, lowestAsk);
   return `${diff.toFixed(2)} (${percent.toFixed(2)}%)`;

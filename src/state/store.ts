@@ -8,5 +8,5 @@ const store: Store = configureStore({
     orderBook: orderBookReducer
   }
 });
- 
+
 export default store;
