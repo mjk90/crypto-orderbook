@@ -41,7 +41,7 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
   const bidsList: Array<[number, number]> = [...orderData.bids.entries()];
 
   return (
-    <div className={`OrderBook ${orderData.connected ? "" : "connecting"}`}>
+    <div data-testid="OrderBook" className={`OrderBook ${orderData.connected ? "" : "connecting"}`}>
       {
         loading ? <LoadingSpinner /> :
           error ? <div>Error: {error}</div> :

@@ -15,7 +15,7 @@ export const TestPage: FC<TestPageProps> = props => {
       {
         loading ? <LoadingSpinner /> :
         error ? <div>Error: {error}</div> :
-        <div>
+        <div data-testid="TestPage">
           <div>{message} {name}</div>
           <button onClick={() => dispatch(setName("Matt"))}>Reset</button>
           <button onClick={() => dispatch(randomName())}>Random</button>

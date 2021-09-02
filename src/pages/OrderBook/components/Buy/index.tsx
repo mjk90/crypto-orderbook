@@ -23,15 +23,15 @@ export const Buy: FC<BuyProps> = props => {
         <div>Size</div>
         <div>Price</div>
       </div>
-      {groupedBids.length === 0 ? <LoadingSpinner /> :
+      {groupedBids.length === 0 ? <LoadingSpinner testid="GroupedBids__Loading" /> :
       groupedBids.map((bid: Order, index: number) => {
         const { price, size, total = 0 } = bid;
         const depth: number = percentage(total, highest);
         return (
-          <div className="OrderBook__Row" style={{ background: `linear-gradient(to left, #113534 ${depth}%, transparent ${depth}%)` }} key={index}>
-            <div>{total}</div>
-            <div>{size}</div>
-            <div>{price}</div>
+          <div className="OrderBook__Row" style={{ background: `linear-gradient(to left, #113534 ${depth}%, transparent ${depth}%)` }} key={index} data-testid="OrderBook__Row">
+            <div data-testid="OrderBook__Row__Total">{total}</div>
+            <div data-testid="OrderBook__Row__Size">{size}</div>
+            <div data-testid="OrderBook__Row__Price">{price}</div>
           </div>
         )
       })}
