@@ -16,7 +16,7 @@ const getEmptyDelta = (): OrderUpdate => {
     bids: [], 
     asks: []
   }
-}
+};
 
 export class OrderFeedSocket {
   private url: string = "wss://www.cryptofacilities.com/ws/v1";
@@ -45,7 +45,7 @@ export class OrderFeedSocket {
     } else {
       this.setupInitialConnection(id);
     }
-  };
+  }
 
   private setupInitialConnection(id: string) {
     try {
@@ -127,7 +127,7 @@ export class OrderFeedSocket {
       .sort((a: [number, number], b: [number, number]) => { return reverse ? b[0] - a[0] : a[0] - b[0] })
       .slice(0, this.feedSize)
     );
-  };
+  }
 
   private emitData() {
     // On each 'emitData', update 'data' using the accumulated 'deltas', then empty the 'delta' object, and finally, post to the UI
@@ -139,5 +139,5 @@ export class OrderFeedSocket {
     };
     this.delta = getEmptyDelta();
     this.onEmit(this.data);
-  };
+  }
 }

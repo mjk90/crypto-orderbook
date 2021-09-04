@@ -66,7 +66,8 @@
   "jest": {
     "moduleNameMapper": {
       "worker-loader!workers/(.*\\.worker)$": "<rootDir>/src/workers/__mocks__/$1",
-      "worker-loader!workers/(.*)$": "<rootDir>/src/workers/$1"
+      "worker-loader!workers/(.*)$": "<rootDir>/src/workers/$1",
+      "customhooks": "<rootDir>/src/customhooks/__mocks__"
     }
   }
 }

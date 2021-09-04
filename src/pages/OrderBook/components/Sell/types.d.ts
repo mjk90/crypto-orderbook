@@ -1,4 +1,4 @@
-import { Order } from 'hooks'
+import { Order } from 'customhooks'
 export interface SellProps {
   asksList: Array<[number, number]>;
 }

@@ -7,5 +7,5 @@ interface LoadingSpinnerProps {
 }
 
 export const LoadingSpinner: FC<LoadingSpinnerProps> = (props: LoadingSpinnerProps) => 
-  <div data-testid={props.testid} className={`lds-ring ${props.className}`}><div></div><div></div><div></div><div></div></div>
+  <div data-testid={props.testid} className={`lds-ring ${props.className || ""}`}><div></div><div></div><div></div><div></div></div>
 ;

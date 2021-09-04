@@ -12,7 +12,7 @@ import { DropdownOption } from "components/Dropdown/types";
 import { Buy } from "./components/Buy";
 import { Sell } from "./components/Sell";
 import { OrderFeed } from "types/order";
-import { useOrderFeed } from "hooks";
+import { useOrderFeed } from "customhooks";
 
 import "./style.scss";
 
@@ -35,7 +35,7 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
   const setDefaultGrouping = (feed: OrderBookData["feed"]) => dispatch(setOptions({ grouping: Number((groupingOptions.get(feed) || [])[0]?.value), feed }));
 
   const { data: { grouping, feed }, error, loading }: OrderBookState = useSelector((state: RootState) => state.orderBook);
-  const orderData: OrderFeed = useOrderFeed(feed, setDefaultGrouping, forceError);
+  const orderData: OrderFeed = useOrderFeed(feed, setDefaultGrouping, forceError);  
   
   const asksList: Array<[number, number]> = [...orderData.asks.entries()];
   const bidsList: Array<[number, number]> = [...orderData.bids.entries()];
@@ -43,11 +43,11 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
   return (
     <div data-testid="OrderBook" className={`OrderBook ${orderData.connected ? "" : "connecting"}`}>
       {
-        loading ? <LoadingSpinner /> :
-          error ? <div>Error: {error}</div> :
+        loading ? <LoadingSpinner testid="OrderBook__Loading" /> :
+          error ? <div data-testid="OrderBook__Error">Error: {error}</div> :
             <React.Fragment>
               <div className="OrderBook__Header">
-                <h3>Order Book ({feed}) {orderData.connected ? "" : <span className="ellipsis">Reconnecting</span>}</h3>
+                <h3>Order Book ({feed}) {orderData.connected ? "" : <span className="ellipsis" data-testid="OrderBook_Reconnecting">Reconnecting</span>}</h3>
                 <div className="OrderBook__Spread">
                   Spread: {getSpread(asksList, bidsList)}
                 </div>

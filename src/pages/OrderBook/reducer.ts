@@ -22,10 +22,16 @@ const orderBookSlice = createGenericSlice({
         loading: false,
         error: null
       }
+    },
+    setError: (state: OrderBookState, action: PayloadAction<string>) => { 
+      return {
+        ...state,
+        error: action.payload
+      }
     }
   }
 });
 
-export const { setOptions } = orderBookSlice.actions;
+export const { setOptions, setError } = orderBookSlice.actions;
 
 export default orderBookSlice.reducer;

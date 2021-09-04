@@ -1,5 +1,5 @@
 import { OrderFeed, OrderFeedMessage } from "types/order";
-import { OrderFeedSocket } from "./orderFeedSocket";
+import { OrderFeedSocket } from "websockets/orderFeedSocket";
 
 const socket: OrderFeedSocket = new OrderFeedSocket(
   "wss://www.cryptofacilities.com/ws/v1", 
