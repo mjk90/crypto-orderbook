@@ -69,11 +69,11 @@ describe("OrderBook component", () => {
 
   test("Renders spread", () => {
     const store = mockStore(mockStoreObject);
-    const { getByText } = render(
+    const { getAllByText } = render(
       <Provider store={store}>
         <OrderBookPage />
       </Provider>
     );
-    expect(getByText(/Spread:(\n*)(\s*)-- \(--%\)/i)).toBeInTheDocument();
+    expect(getAllByText(/Spread:(\n*)(\s*)-- \(--%\)/i)).toBeTruthy();
   });
 });
