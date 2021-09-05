@@ -1,3 +1,10 @@
+@import 'styles/variables.scss';
+
 .Dropdown {
-  
+  background: $app-gray;
+  border: none;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.2rem;
 }

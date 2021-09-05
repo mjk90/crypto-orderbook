@@ -1,7 +1,13 @@
+@import 'styles/variables.scss';
+
 .OrderBook {
   display: grid;
   grid-template-rows: 2rem 1fr 3rem;
   height: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-size: 0.8rem;
+  font-weight: 500;
   
   &.connecting {
     color: lightgray;
@@ -11,12 +17,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0.25rem;
+    border-bottom: 1px solid $app-gray;
+
+    .OrderBook__Spread {
+      color: $app-gray;
+    }
   }
 
   .OrderBook__Body {
     display: flex;
     justify-content: space-evenly;
-    align-items: center;
+    align-items: flex-start;
     
     > div {
       width: 50%;
@@ -28,12 +40,24 @@
     }
     .OrderBook__Row {
       display: flex;
+      padding: 0.25rem 0;
+
       &:first-child {
-        font-weight: bold;
+        text-transform: uppercase;
+        color: $app-gray;
+        border-bottom: 1px solid #232a3c;
+        padding: 0.35rem 0;
       }
 
       > div {
         flex-basis: 33%;
+      }
+
+      .OrderBook__Row__Price__Buy {
+        color: #13ab75;
+      }
+      .OrderBook__Row__Price__Sell {
+        color: #db4446;
       }
     }
   }

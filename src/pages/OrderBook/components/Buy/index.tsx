@@ -29,9 +29,9 @@ export const Buy: FC<BuyProps> = props => {
         const depth: number = percentage(total, highest);
         return (
           <div className="OrderBook__Row" style={{ background: `linear-gradient(to left, #113534 ${depth}%, transparent ${depth}%)` }} key={index} data-testid="OrderBook__Row">
-            <div data-testid="OrderBook__Row__Total">{total}</div>
-            <div data-testid="OrderBook__Row__Size">{size}</div>
-            <div data-testid="OrderBook__Row__Price">{price}</div>
+            <div data-testid="OrderBook__Row__Total">{total.toLocaleString()}</div>
+            <div data-testid="OrderBook__Row__Size">{size.toLocaleString()}</div>
+            <div data-testid="OrderBook__Row__Price" className="OrderBook__Row__Price__Buy">{price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
           </div>
         )
       })}
