@@ -47,7 +47,7 @@ export class OrderFeedSocket {
     }
   }
 
-  private setupInitialConnection(id: string) {
+  setupInitialConnection(id: string) {
     try {
       console.log("Attempting to set up websocket connection...");
       this.client = new WebSocket(this.url);
@@ -60,7 +60,7 @@ export class OrderFeedSocket {
     }
   }
 
-  private onWsMessage (message: IMessageEvent, id: string) {
+  onWsMessage (message: IMessageEvent, id: string) {
     try {
       const { event = "", feed = "", product_id = "", bids = [], asks = [] } = JSON.parse(message.data.toString());      
       if(this.error) {
@@ -85,7 +85,7 @@ export class OrderFeedSocket {
           };
           break;
         default:
-          console.log(event ? `Recieved event: ${message.data}` : `Message not recognized: ${message}`);
+          console.log(event ? `Recieved event: ${event}` : `Message not recognized: ${message}`);
           break;
       }
     } catch(err) {
@@ -95,7 +95,7 @@ export class OrderFeedSocket {
     }
   }
 
-  private changeFeed(id: string) {
+  changeFeed(id: string) {
     this.client.send(JSON.stringify({ "event": "unsubscribe", "feed": "book_ui_1", "product_ids": [this.data.id] }));
     this.client.send(JSON.stringify({ "event": "subscribe", "feed": "book_ui_1", "product_ids": [id] }));
     this.data = getEmptyFeed();
@@ -113,7 +113,7 @@ export class OrderFeedSocket {
     this.error = message;
   }
 
-  private updateOrders(data: Array<number[]>, existingData: Map<number, number>, reverse: boolean = false): Map<number, number> {
+  updateOrders(data: Array<number[]>, existingData: Map<number, number>, reverse: boolean = false): Map<number, number> {
     for (const [price, size] of data) {
       if (size === 0) {
         existingData.delete(price);
@@ -129,8 +129,8 @@ export class OrderFeedSocket {
     );
   }
 
-  private emitData() {
-    // On each 'emitData', update 'data' using the accumulated 'deltas', then empty the 'delta' object, and finally, post to the UI
+  emitData() {
+    // On each 'emitData', update 'data' using the accumulated 'deltas', then empty the 'delta' object, and finally, post to the UI    
     this.data = {
       ...this.data,
       asks: this.delta.asks.length ? this.updateOrders(this.delta.asks, this.data.asks) : this.data.asks,
