@@ -40,6 +40,8 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
   const asksList: Array<[number, number]> = [...orderData.asks.entries()];
   const bidsList: Array<[number, number]> = [...orderData.bids.entries()];
 
+  const spreadText: string = `Spread: ${getSpread(asksList, bidsList)}`;
+
   return (
     <div data-testid="OrderBook" className={`OrderBook ${orderData.connected ? "" : "connecting"}`}>
       {
@@ -48,8 +50,8 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
             <React.Fragment>
               <div className="OrderBook__Header">
                 <h3>Order Book ({feed}) {orderData.connected ? "" : <span className="ellipsis" data-testid="OrderBook_Reconnecting">Reconnecting</span>}</h3>
-                <div className="OrderBook__Spread">
-                  Spread: {getSpread(asksList, bidsList)}
+                <div className="OrderBook__Spread OrderBook__Spread__Upper">
+                  {spreadText}
                 </div>
                 <Dropdown value={grouping} disabled={!orderData.connected}
                   onChange={(e: ChangeEvent<HTMLSelectElement>) => dispatch(setOptions({ grouping: parseFloat(e.target.value), feed }))}
@@ -57,6 +59,9 @@ export const OrderBookPage: FC<OrderBookPageProps> = props => {
               </div>
               <div className="OrderBook__Body">
                 <Buy bidsList={bidsList} />
+                <div className="OrderBook__Spread OrderBook__Spread__Lower">
+                  {spreadText}
+                </div>
                 <Sell asksList={asksList} />
               </div>
               <div className="OrderBook__Footer">
