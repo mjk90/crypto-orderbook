@@ -25,4 +25,5 @@ onmessage = (event: MessageEvent<OrderFeedMessage>) => {
   }
 };
 
-export default {};
+const exportObj = {};
+export default exportObj;

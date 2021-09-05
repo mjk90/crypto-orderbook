@@ -13,7 +13,7 @@ const groupData = (data: Array<number[]>, grouping: number): Map<number, Order> 
   for (const [price, size] of data) {
     runningTotal += size;
     let roundedPrice: number = lowestMultiple(price, grouping);
-    let existingOrder = groupedOrders.get(roundedPrice) || <Order>{ price: roundedPrice, size: 0, total: runningTotal };
+    let existingOrder = groupedOrders.get(roundedPrice) || { price: roundedPrice, size: 0, total: runningTotal } as Order;
 
     groupedOrders.set(roundedPrice, { 
       ...existingOrder, 

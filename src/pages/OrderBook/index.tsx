@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useState } from "react";
+import React, { ChangeEvent, FC, useCallback, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import { RootState, OrderBookState, OrderBookData } from "state/types"
@@ -32,7 +32,10 @@ const groupingOptions: Map<string, DropdownOption[]> = new Map<string, DropdownO
 export const OrderBookPage: FC<OrderBookPageProps> = props => {
   const dispatch = useDispatch();
   const [forceError, setForceError] = useState<string>("");
-  const setDefaultGrouping = (feed: OrderBookData["feed"]) => dispatch(setOptions({ grouping: Number((groupingOptions.get(feed) || [])[0]?.value), feed }));
+  const setDefaultGrouping = useCallback(
+    (feed: OrderBookData["feed"]) => dispatch(setOptions({ grouping: Number((groupingOptions.get(feed) || [])[0]?.value), feed })), 
+    [dispatch]
+  );
 
   const { data: { grouping, feed }, error, loading }: OrderBookState = useSelector((state: RootState) => state.orderBook);
   const orderData: OrderFeed = useOrderFeed(feed, setDefaultGrouping, forceError);  
