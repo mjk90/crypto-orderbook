@@ -18,7 +18,10 @@ const orderBookSlice = createGenericSlice({
     setOptions: (state: OrderBookState, action: PayloadAction<OrderBookData>): OrderBookState => {
       return {
         ...state,
-        data: action.payload,
+        data: {
+          grouping: action.payload.grouping || state.data.grouping,
+          feed: action.payload.feed || state.data.feed
+        },
         loading: false,
         error: null
       }

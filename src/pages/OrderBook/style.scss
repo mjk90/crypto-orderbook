@@ -42,7 +42,7 @@
       min-height: 50vh;
 
       .lds-ring {
-        margin: 5rem;
+        margin: 3rem auto;
       }
     }
     .OrderBook__Row {
@@ -94,6 +94,7 @@
       .OrderBook__Buy,
       .OrderBook__Sell {
         width: 100%;
+        justify-content: start;
       }
 
       .OrderBook__Buy {
