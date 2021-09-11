@@ -25,7 +25,7 @@ const groupingOptions: Map<string, DropdownOption[]> = new Map<string, DropdownO
   ["PI_ETHUSD", [
     { value: 0.05, text: "Group 0.05" },
     { value: 0.1, text: "Group 0.1" },
-    { value: 0.025, text: "Group 0.25" },
+    { value: 0.25, text: "Group 0.25" },
   ]]
 ]);
 
